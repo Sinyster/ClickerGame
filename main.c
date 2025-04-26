@@ -20,7 +20,6 @@ int main(void) {
   double moneyPerSecond = 0;
   double moneyPerClick = 0.1;
 
-
 #pragma region Prices
   // Upgrade Prices
   double genPrice = 1;
@@ -59,7 +58,7 @@ int main(void) {
       if (moneyPerSecond > 0) {
         money += moneyPerSecond / 60;
       }
-
+#pragma region Base Render
       // Drawing Base Environment
       DrawRectangleLines(screenWidth / 3, 6, screenWidth / 3, screenHeight - 12,
                          neonGreen);
@@ -80,8 +79,12 @@ int main(void) {
                "Generating per click: %0.2f", moneyPerClick);
       DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
                22, neonGreen);
+#pragma endregion
 #pragma region Balance
       // Format money into Text
+      if (money < 0) {
+        money = 0;
+      }
       char moneyText[20];
       char moneyPerSecondText[20];
       snprintf(moneyText, sizeof(moneyText), "Balance: %0.2f", money);
@@ -126,7 +129,7 @@ int main(void) {
       DrawText(genPriceText, (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 50, 20, neonGreen);
 
-      if ((isClicked || IsKeyPressed(KEY_ONE)) && money >= genPrice) {
+      if ((isClicked || IsKeyPressed(KEY_ONE)) && money >= genPrice - 0.1) {
         money -= genPrice;
         moneyPerSecond += 0.1;
         genItems += 1;
@@ -160,7 +163,8 @@ int main(void) {
       DrawText(clickPriceText, (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
 
-      if ((isClicked || IsKeyPressed(KEY_TWO)) && money >= clickUpgradePrice) {
+      if ((isClicked || IsKeyPressed(KEY_TWO)) &&
+          money >= clickUpgradePrice - 0.1) {
         money -= clickUpgradePrice;
         moneyPerClick *= 1.2;
         clickUpgItems += 1;
