@@ -13,12 +13,14 @@ int main(void) {
   SetExitKey(KEY_NULL);
 
   // Game Variables
-  typedef enum { SCREEN_MAIN, SCREEN_SHORTCUTS } GameScreen;
+  typedef enum { SCREEN_MAIN, SCREEN_SHORTCUTS, SCREEN_MAINMENU } GameScreen;
   GameScreen currentScreen = SCREEN_MAIN;
 
   double money = 0;
   double moneyPerSecond = 0;
   double moneyPerClick = 0.1;
+
+  bool isMainMenuOpened = false;
 
 #pragma region Prices
   // Upgrade Prices
@@ -39,6 +41,9 @@ int main(void) {
     if (IsKeyPressed(KEY_TAB)) {
       currentScreen =
           (currentScreen == SCREEN_MAIN) ? SCREEN_SHORTCUTS : SCREEN_MAIN;
+    } else if (IsKeyPressed(KEY_ESCAPE)) {
+      isMainMenuOpened = isMainMenuOpened ? false : true;
+      currentScreen = isMainMenuOpened ? SCREEN_MAINMENU : SCREEN_MAIN;
     }
 
     BeginDrawing();
@@ -173,6 +178,7 @@ int main(void) {
 
 #pragma endregion
     } else if (currentScreen == SCREEN_SHORTCUTS) {
+#pragma region SHORTCUTS
       char titleSh[] = "Shortcuts:";
       int textWidth = MeasureText(titleSh, 24);
       int textX = screenWidth / 2 - textWidth / 2;
@@ -186,6 +192,34 @@ int main(void) {
       DrawText("2: Second Upgrade",
                screenWidth / 6 - MeasureText("2: Second Upgrade", 24) / 2,
                screenHeight / 6 + 60, 24, neonGreen);
+#pragma endregion
+#pragma region MAINMENU
+    } else if (currentScreen == SCREEN_MAINMENU) {
+      int blockHeight = 75;
+      ClearBackground(BLACK);
+      DrawRectangleLines(screenWidth / 3, screenHeight / 5, screenWidth / 3,
+                         (screenHeight / 5) * 3, neonGreen);
+      DrawText("MAIN MENU", screenWidth / 2 - MeasureText("MAIN MENU", 32) / 2,
+               screenHeight / 6 - 6, 32, neonGreen);
+      Rectangle button = {(screenWidth / 3) + 6, screenHeight / 4,
+                          screenWidth / 3 - 12, blockHeight};
+      bool isHovering = CheckCollisionPointRec(mousePoint, button);
+      bool isClicked = isHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+      // BACK BUTTON
+      DrawRectangleRec(button, neonGreen);
+      DrawRectangleRec(button, isHovering ? GRAY : BLACK);
+      DrawText("BACK", (screenWidth / 2) - MeasureText("BACK", 26) / 2,
+               screenHeight / 4 + blockHeight / 2 - 13, 26, neonGreen);
+      // New Game Button
+      // Save Game Button
+      // Load Game Button
+      // Exit Game Button
+
+      if (isClicked) {
+        currentScreen = SCREEN_MAIN;
+        isMainMenuOpened = false;
+      }
+#pragma endregion
     }
 
     EndDrawing();
