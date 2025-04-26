@@ -84,26 +84,31 @@ int main(void) {
                "Generating per click: %0.2f", moneyPerClick);
       DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
                22, neonGreen);
+      char generatorPerSecond[30];
+      snprintf(generatorPerSecond, sizeof(generatorPerSecond),
+               "Generators generating: %0.2f/s", genItems * 0.1);
+      DrawText(generatorPerSecond, screenWidth / 3 + 6,
+               screenHeight * 0.05 + 60, 22, neonGreen);
 #pragma endregion
-#pragma region Balance
+#pragma region Money
       // Format money into Text
       if (money < 0) {
         money = 0;
       }
       char moneyText[20];
       char moneyPerSecondText[20];
-      snprintf(moneyText, sizeof(moneyText), "Balance: %0.2f", money);
+      snprintf(moneyText, sizeof(moneyText), "Money: %0.2f", money);
       snprintf(moneyPerSecondText, sizeof(moneyPerSecondText), "%0.2f/s",
                moneyPerSecond);
-      // Drawing Balance
+      // Drawing Money
       int textWidth = MeasureText(moneyText, 32);
       int textX = screenWidth / 6 - textWidth / 2;
       DrawText(moneyText, textX, screenHeight / 3, 32, neonGreen);
 
-      // Drawing Balance per Second
+      // Drawing Money per Second
       textWidth = MeasureText(moneyPerSecondText, 22);
       textX = screenWidth / 6 - textWidth / 2;
-      DrawText(moneyPerSecondText, textX, screenHeight / 3 + 25, 22, neonGreen);
+      DrawText(moneyPerSecondText, textX, screenHeight / 3 + 32, 22, neonGreen);
 #pragma endregion
 
       // Drawing Upgrades
@@ -182,6 +187,8 @@ int main(void) {
       char titleSh[] = "Shortcuts:";
       int textWidth = MeasureText(titleSh, 24);
       int textX = screenWidth / 2 - textWidth / 2;
+
+      // FIRST COLUMN
       DrawText("Shortcuts:", textX, screenHeight * 0.04, 24, neonGreen);
       DrawText("G: Generate",
                screenWidth / 6 - MeasureText("G: Generate", 24) / 2,
@@ -192,6 +199,12 @@ int main(void) {
       DrawText("2: Second Upgrade",
                screenWidth / 6 - MeasureText("2: Second Upgrade", 24) / 2,
                screenHeight / 6 + 60, 24, neonGreen);
+
+      // SECOND COLUMN
+      DrawText("ESC: Opens Main Menu",
+               (screenWidth / 6) * 5 -
+                   MeasureText("ESC: Opens Main Menu", 24) / 2,
+               screenHeight / 6, 24, neonGreen);
 #pragma endregion
 #pragma region MAINMENU
     } else if (currentScreen == SCREEN_MAINMENU) {
