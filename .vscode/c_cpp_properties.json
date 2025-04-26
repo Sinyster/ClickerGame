@@ -3,10 +3,10 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:/raylib/raylib/src",
-                "C:/raylib/raylib/src/external",
-                "C:/raylib/raylib/w64devkit/include",
-                "C:/raylib/raylib/src/raylib.h",
+                "C:/raylib/src",
+                "C:/raylib/src/external",
+                "C:/raylib/w64devkit/include",
+                "C:/raylib/src/raylib.h",
                 "${workspaceFolder}/**"
             ],
             "defines": [
@@ -16,14 +16,14 @@
                 "GRAPHICS_API_OPENGL_33",
                 "PLATFORM_DESKTOP"
             ],
-            "compilerPath": "C:/raylib/raylib/w64devkit/bin/gcc.exe",
+            "compilerPath": "C:/raylib/w64devkit/bin/gcc.exe",
             "cStandard": "c99",
             "cppStandard": "c++14",
             "intelliSenseMode": "windows-gcc-x64",
             "compilerArgs": [
-                "-IC:/raylib/raylib/src",
-                "-IC:/raylib/raylib/src/external",
-                "-IC:/raylib/raylib/w64devkit/include"
+                "-IC:/raylib/src",
+                "-IC:/raylib/src/external",
+                "-IC:/raylib/w64devkit/include"
             ]
         },
         {
