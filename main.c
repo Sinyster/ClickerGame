@@ -20,9 +20,16 @@ int main(void) {
   double moneyPerSecond = 0;
   double moneyPerClick = 0.1;
 
+
+#pragma region Prices
   // Upgrade Prices
-  double genPrice = 10;
-  double genItems = 0;
+  double genPrice = 1;
+  int genItems = 0;
+
+  double clickUpgradePrice = 1;
+  int clickUpgItems = 0;
+
+#pragma endregion
 
   while (!WindowShouldClose()) {
     // Colors
@@ -56,6 +63,8 @@ int main(void) {
       // Drawing Base Environment
       DrawRectangleLines(screenWidth / 3, 6, screenWidth / 3, screenHeight - 12,
                          neonGreen);
+      DrawRectangleRec(button, isHovering ? DARKGREEN : GREEN);
+      DrawText("Generate", button.x + 50, button.y + 15, 20, WHITE);
 
       // Headers
       DrawText("Statistics:", screenWidth / 3 + 10, screenHeight * 0.04, 22,
@@ -68,15 +77,15 @@ int main(void) {
       // Drawing Statistics
       char moneyPerClickText[30];
       snprintf(moneyPerClickText, sizeof(moneyPerClickText),
-               "Generating per click: %0.5f", moneyPerClick);
+               "Generating per click: %0.2f", moneyPerClick);
       DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
                22, neonGreen);
-
+#pragma region Balance
       // Format money into Text
       char moneyText[20];
       char moneyPerSecondText[20];
-      snprintf(moneyText, sizeof(moneyText), "Balance: %0.5f", money);
-      snprintf(moneyPerSecondText, sizeof(moneyPerSecondText), "%0.5f/s",
+      snprintf(moneyText, sizeof(moneyText), "Balance: %0.2f", money);
+      snprintf(moneyPerSecondText, sizeof(moneyPerSecondText), "%0.2f/s",
                moneyPerSecond);
       // Drawing Balance
       int textWidth = MeasureText(moneyText, 32);
@@ -87,13 +96,15 @@ int main(void) {
       textWidth = MeasureText(moneyPerSecondText, 22);
       textX = screenWidth / 6 - textWidth / 2;
       DrawText(moneyPerSecondText, textX, screenHeight / 3 + 25, 22, neonGreen);
+#pragma endregion
 
+      // Drawing Upgrades
       bool isUpgradeHovering = false;
-// Drawing Upgrades
-#pragma region
+      const int blockHeight = 75;
+#pragma region Generator  Upgrade
       Rectangle generatorUpgrade = {(screenWidth / 3) * 2 + 6,
                                     screenHeight * 0.05 + 26,
-                                    (screenWidth / 3) - 18, 75};
+                                    (screenWidth / 3) - 18, blockHeight};
 
       DrawRectangleRec(generatorUpgrade, BLACK);
 
@@ -101,11 +112,17 @@ int main(void) {
       isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
       DrawRectangleRec(generatorUpgrade, isUpgradeHovering ? GRAY : BLACK);
       DrawRectangleLines((screenWidth / 3) * 2 + 6, screenHeight * 0.05 + 26,
-                         screenWidth / 3 - 18, 75, neonGreen);
+                         screenWidth / 3 - 18, blockHeight, neonGreen);
       DrawText("Generator", (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 30, 22, neonGreen);
-      char genPriceText[20];
-      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.5f", genPrice);
+      char genItemsText[20];
+      snprintf(genItemsText, sizeof(genItemsText), "Bought: %dx", genItems);
+      DrawText(genItemsText,
+               (screenWidth / 3) * 2 +
+                   ((screenWidth / 3) - MeasureText(genItemsText, 20) - 18),
+               screenHeight * 0.05 + 50, 20, neonGreen);
+      char genPriceText[30];
+      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.2f", genPrice);
       DrawText(genPriceText, (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 50, 20, neonGreen);
 
@@ -113,21 +130,58 @@ int main(void) {
         money -= genPrice;
         moneyPerSecond += 0.1;
         genItems += 1;
-        genPrice *= (genItems * 1.1);
+        genPrice *= 1.6;
       }
 
 #pragma endregion
+#pragma region Enhanced click Upgrade
+      Rectangle clickUpgrade = {(screenWidth / 3) * 2 + 6,
+                                screenHeight * 0.05 + 32 + blockHeight,
+                                (screenWidth / 3) - 18, blockHeight};
+      DrawRectangleRec(clickUpgrade, BLACK);
+      isUpgradeHovering = CheckCollisionPointRec(mousePoint, clickUpgrade);
+      isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+      DrawRectangleRec(clickUpgrade, isUpgradeHovering ? GRAY : BLACK);
+      DrawRectangleLines((screenWidth / 3) * 2 + 6,
+                         screenHeight * 0.05 + 32 + blockHeight,
+                         screenWidth / 3 - 18, blockHeight, neonGreen);
+      DrawText("Click Upgrade", (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 34 + blockHeight, 22, neonGreen);
+      char clickItemsText[30];
+      snprintf(clickItemsText, sizeof(clickItemsText), "Bought: %dx",
+               clickUpgItems);
+      DrawText(clickItemsText,
+               (screenWidth / 3) * 2 +
+                   ((screenWidth / 3) - MeasureText(clickItemsText, 20) - 18),
+               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
+      char clickPriceText[30];
+      snprintf(clickPriceText, sizeof(clickPriceText), "Price: %0.2f",
+               clickUpgradePrice);
+      DrawText(clickPriceText, (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
 
-      DrawRectangleRec(button, isHovering ? DARKGREEN : GREEN);
-      DrawText("Generate", button.x + 50, button.y + 15, 20, WHITE);
+      if ((isClicked || IsKeyPressed(KEY_TWO)) && money >= clickUpgradePrice) {
+        money -= clickUpgradePrice;
+        moneyPerClick *= 1.2;
+        clickUpgItems += 1;
+        clickUpgradePrice *= 1.6;
+      }
+
+#pragma endregion
     } else if (currentScreen == SCREEN_SHORTCUTS) {
       char titleSh[] = "Shortcuts:";
-      int textWidth = MeasureText(titleSh, 20);
+      int textWidth = MeasureText(titleSh, 24);
       int textX = screenWidth / 2 - textWidth / 2;
-      DrawText("Shortcuts:", textX, screenHeight * 0.04, 20, neonGreen);
+      DrawText("Shortcuts:", textX, screenHeight * 0.04, 24, neonGreen);
       DrawText("G: Generate",
-               screenWidth / 6 - MeasureText("G: Generate", 20) / 2,
-               screenHeight / 6, 20, neonGreen);
+               screenWidth / 6 - MeasureText("G: Generate", 24) / 2,
+               screenHeight / 6, 24, neonGreen);
+      DrawText("1: First Upgrade",
+               screenWidth / 6 - MeasureText("1: First Upgrade", 24) / 2,
+               screenHeight / 6 + 30, 24, neonGreen);
+      DrawText("2: Second Upgrade",
+               screenWidth / 6 - MeasureText("2: Second Upgrade", 24) / 2,
+               screenHeight / 6 + 60, 24, neonGreen);
     }
 
     EndDrawing();
