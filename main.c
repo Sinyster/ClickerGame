@@ -4,8 +4,8 @@
 
 int main(void) {
   // Base Variables
-  const int screenWidth = 1500;
-  const int screenHeight = 800;
+  const int screenWidth = 1280;
+  const int screenHeight = 720;
   char title[] = "Clicker";
 
   InitWindow(screenWidth, screenHeight, title);
@@ -186,48 +186,112 @@ int main(void) {
 
       // FIRST COLUMN
       DrawText("Shortcuts:", textX, screenHeight * 0.04, 24, neonGreen);
-      DrawText("G: Generate",
-               screenWidth / 6 - MeasureText("G: Generate", 24) / 2,
-               screenHeight / 6, 24, neonGreen);
-      DrawText("1: First Upgrade",
-               screenWidth / 6 - MeasureText("1: First Upgrade", 24) / 2,
-               screenHeight / 6 + 30, 24, neonGreen);
-      DrawText("2: Second Upgrade",
-               screenWidth / 6 - MeasureText("2: Second Upgrade", 24) / 2,
-               screenHeight / 6 + 60, 24, neonGreen);
+      DrawText("G: Acts like a click", screenWidth / 6, screenHeight / 6, 24,
+               neonGreen);
+      DrawText("1: Buys First Upgrade", screenWidth / 6, screenHeight / 6 + 30,
+               24, neonGreen);
+      DrawText("2: Buys Second Upgrade", screenWidth / 6, screenHeight / 6 + 60,
+               24, neonGreen);
 
       // SECOND COLUMN
       DrawText("ESC: Opens Main Menu",
-               (screenWidth / 6) * 5 -
+               (screenWidth / 6) * 4 -
                    MeasureText("ESC: Opens Main Menu", 24) / 2,
                screenHeight / 6, 24, neonGreen);
 #pragma endregion
 #pragma region MAINMENU
     } else if (currentScreen == SCREEN_MAINMENU) {
-      int blockHeight = 75;
+      int blockHeight = 65;
+      const int spaceBetween = 6;
+      bool isButtonHovering = false;
+      bool isClicked = false;
+
+      // Main Menu Base Render
       ClearBackground(BLACK);
       DrawRectangleLines(screenWidth / 3, screenHeight / 5, screenWidth / 3,
                          (screenHeight / 5) * 3, neonGreen);
       DrawText("MAIN MENU", screenWidth / 2 - MeasureText("MAIN MENU", 32) / 2,
                screenHeight / 6 - 6, 32, neonGreen);
-      Rectangle button = {(screenWidth / 3) + 6, screenHeight / 4,
-                          screenWidth / 3 - 12, blockHeight};
-      bool isHovering = CheckCollisionPointRec(mousePoint, button);
-      bool isClicked = isHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-      // BACK BUTTON
-      DrawRectangleRec(button, neonGreen);
-      DrawRectangleRec(button, isHovering ? GRAY : BLACK);
+
+      // Back Button
+      Rectangle backButton = {(screenWidth / 3) + 6, screenHeight / 4,
+                              screenWidth / 3 - 12, blockHeight};
+
+      isButtonHovering = CheckCollisionPointRec(mousePoint, backButton);
+      isClicked = isButtonHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(backButton, isButtonHovering ? GRAY : BLACK);
       DrawText("BACK", (screenWidth / 2) - MeasureText("BACK", 26) / 2,
                screenHeight / 4 + blockHeight / 2 - 13, 26, neonGreen);
-      // New Game Button
-      // Save Game Button
-      // Load Game Button
-      // Exit Game Button
-
       if (isClicked) {
         currentScreen = SCREEN_MAIN;
         isMainMenuOpened = false;
       }
+
+      // New Game Button
+      Rectangle newGameButton = {
+          (screenWidth / 3) + 6, screenHeight / 4 + blockHeight + spaceBetween,
+          screenWidth / 3 - 2 * spaceBetween, blockHeight};
+      isButtonHovering = CheckCollisionPointRec(mousePoint, newGameButton);
+      isClicked = isButtonHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(newGameButton, isButtonHovering ? GRAY : BLACK);
+      DrawText("New Game", (screenWidth / 2) - MeasureText("New Game", 26) / 2,
+               screenHeight / 4 + 2 * blockHeight - blockHeight / 2 - 9, 26,
+               neonGreen);
+      if (isClicked) {
+        // New Game Function
+      }
+
+      // Save Game Button
+      Rectangle saveGameButton = {
+          (screenWidth / 3) + 6,
+          screenHeight / 4 + (2 * blockHeight) + (spaceBetween * 2),
+          screenWidth / 3 - 2 * spaceBetween, blockHeight};
+      isButtonHovering = CheckCollisionPointRec(mousePoint, saveGameButton);
+      isClicked = isButtonHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(saveGameButton, isButtonHovering ? GRAY : BLACK);
+      DrawText(
+          "Save Game", (screenWidth / 2) - MeasureText("Save Game", 26) / 2,
+          screenHeight / 4 + 3 * blockHeight - blockHeight / 2, 26, neonGreen);
+      if (isClicked) {
+        // Save Game Function
+      }
+
+      // Load Game Button
+      Rectangle loadGameButton = {
+          (screenWidth / 3) + 6,
+          screenHeight / 4 + (3 * blockHeight) + (spaceBetween * 3),
+          screenWidth / 3 - 2 * spaceBetween, blockHeight};
+      isButtonHovering = CheckCollisionPointRec(mousePoint, loadGameButton);
+      isClicked = isButtonHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(loadGameButton, isButtonHovering ? GRAY : BLACK);
+      DrawText("Load Game",
+               (screenWidth / 2) - MeasureText("Load Game", 26) / 2,
+               screenHeight / 4 + 4 * blockHeight - blockHeight / 2 + 6, 26,
+               neonGreen);
+      if (isClicked) {
+        // Load Game Function
+      }
+
+      // Exit Game Button
+      Rectangle exitButton = {(screenWidth / 3) + 6,
+                              screenHeight / 4 + (4 * blockHeight) +
+                                  (spaceBetween * 4),
+                              screenWidth / 3 - 2 * spaceBetween, blockHeight};
+      isButtonHovering = CheckCollisionPointRec(mousePoint, exitButton);
+      isClicked = isButtonHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(exitButton, isButtonHovering ? GRAY : BLACK);
+      DrawText("Exit", (screenWidth / 2) - MeasureText("Exit", 26) / 2,
+               screenHeight / 4 + 5 * blockHeight - blockHeight / 2 + 12, 26,
+               neonGreen);
+      if (isClicked) {
+        // Exit Function
+      }
+
 #pragma endregion
     }
 
