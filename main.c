@@ -42,6 +42,8 @@ int main(void) {
   bool justSaved = false;
   bool justLoaded = false;
   static float timer = 0.0f;
+  static float saveTimer = 0.0f;
+  static float secondsTillSave = 30.0f;
 
   GameData game = {0};
   game.moneyPerClick = 0.1;
@@ -82,6 +84,7 @@ int main(void) {
       if (game.moneyPerSecond > 0) {
         game.money += game.moneyPerSecond / 60;
       }
+
 #pragma region Base Render
       // Drawing Base Environment
       DrawRectangleLines(screenWidth / 3, 6, screenWidth / 3, screenHeight - 12,
@@ -98,6 +101,36 @@ int main(void) {
       DrawText("TAB: Shortcut Menu", 10, 26, 16, neonGreen);
       DrawLine(screenWidth / 3, screenHeight * 0.05 + 20, screenWidth - 6,
                screenHeight * 0.05 + 20, neonGreen);
+
+#pragma region AutoSave Func
+      secondsTillSave -= GetFrameTime();
+      if (secondsTillSave < 0.2f && secondsTillSave > 0.1f) {
+        saveGame(&game);
+        justSaved = true;
+      } else if (secondsTillSave < 0.1f) {
+        secondsTillSave = 30.0f;
+      }
+
+      if (justSaved) {
+        timer += GetFrameTime();
+        if (timer < 1.5f) {
+          DrawText("Game Saved!",
+                   screenWidth / 2 - MeasureText("Game Saved!", 26) / 2,
+                   (screenHeight / 10) * 8, 26, neonGreen);
+        } else {
+          justSaved = false;
+
+          timer = 0.0f;
+        }
+      }
+#pragma endregion
+
+      char saveTimerText[20];
+      snprintf(saveTimerText, sizeof(saveTimerText), "Autosave: %0.1fs",
+               secondsTillSave);
+      DrawText(saveTimerText,
+               screenWidth / 2 - MeasureText(saveTimerText, 20) / 2,
+               (screenHeight / 10) * 9, 20, neonGreen);
 
       // Drawing Statistics
       char moneyPerClickText[30];
