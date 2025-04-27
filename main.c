@@ -2,6 +2,27 @@
 #include <math.h>
 #include <stdio.h>
 
+double money = 0.0;
+double moneyPerSecond = 0.0;
+double moneyPerClick = 0.1;
+
+typedef struct GameData {
+  // Default Variables
+  double money;
+  double moneyPerSecond;
+  double moneyPerClick;
+
+  // Items Variables
+  double genPrice;
+  int genItems;
+
+  double clickPrice;
+  int clickItems;
+} GameData;
+
+void saveGame(GameData *data);
+GameData loadGame();
+
 int main(void) {
   // Base Variables
   const int screenWidth = 1280;
@@ -16,22 +37,20 @@ int main(void) {
   typedef enum { SCREEN_MAIN, SCREEN_SHORTCUTS, SCREEN_MAINMENU } GameScreen;
   GameScreen currentScreen = SCREEN_MAIN;
 
-  double money = 0;
-  double moneyPerSecond = 0;
-  double moneyPerClick = 0.1;
-
   bool isMainMenuOpened = false;
 
-#pragma region Prices
-  // Upgrade Prices
-  double genPrice = 1;
-  int genItems = 0;
+  bool justSaved = false;
+  bool justLoaded = false;
+  static float timer = 0.0f;
 
-  double clickUpgradePrice = 1;
-  int clickUpgItems = 0;
-
+  GameData game = {0};
+  game.moneyPerClick = 0.1;
+  game.moneyPerSecond = 0.0;
+  game.genPrice = 1.0;
+  game.clickPrice = 1.0;
 #pragma endregion
 
+#pragma region APP
   while (!WindowShouldClose()) {
     // Colors
     Color neonGreen = (Color){57, 255, 20, 255};
@@ -57,11 +76,11 @@ int main(void) {
       bool isClicked = isHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
       if (isClicked || IsKeyPressed(KEY_G)) {
-        money += moneyPerClick;
+        game.money += game.moneyPerClick;
       }
 
-      if (moneyPerSecond > 0) {
-        money += moneyPerSecond / 60;
+      if (game.moneyPerSecond > 0) {
+        game.money += game.moneyPerSecond / 60;
       }
 #pragma region Base Render
       // Drawing Base Environment
@@ -83,25 +102,25 @@ int main(void) {
       // Drawing Statistics
       char moneyPerClickText[30];
       snprintf(moneyPerClickText, sizeof(moneyPerClickText),
-               "Generating per click: %0.2f", moneyPerClick);
+               "Generating per click: %0.2f", game.moneyPerClick);
       DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
                22, neonGreen);
       char generatorPerSecond[30];
       snprintf(generatorPerSecond, sizeof(generatorPerSecond),
-               "Generators generating: %0.2f/s", genItems * 0.1);
+               "Generators generating: %0.2f/s", game.genItems * 0.1);
       DrawText(generatorPerSecond, screenWidth / 3 + 6,
                screenHeight * 0.05 + 60, 22, neonGreen);
 #pragma endregion
 #pragma region Money
       // Format money into Text
-      if (money < 0) {
-        money = 0;
+      if (game.money < 0) {
+        game.money = 0;
       }
       char moneyText[20];
       char moneyPerSecondText[20];
-      snprintf(moneyText, sizeof(moneyText), "Money: %0.2f", money);
+      snprintf(moneyText, sizeof(moneyText), "Money: %0.2f", game.money);
       snprintf(moneyPerSecondText, sizeof(moneyPerSecondText), "%0.2f/s",
-               moneyPerSecond);
+               game.moneyPerSecond);
       // Drawing Money
       int textWidth = MeasureText(moneyText, 32);
       int textX = screenWidth / 6 - textWidth / 2;
@@ -130,23 +149,23 @@ int main(void) {
                screenHeight * 0.05 + 30, 22, neonGreen);
       char clickItemsText[30];
       snprintf(clickItemsText, sizeof(clickItemsText), "Bought: %dx",
-               clickUpgItems);
+               game.clickItems);
       DrawText(clickItemsText,
                (screenWidth / 3) * 2 +
                    ((screenWidth / 3) - MeasureText(clickItemsText, 20) - 18),
                screenHeight * 0.05 + 50, 20, neonGreen);
       char clickPriceText[30];
       snprintf(clickPriceText, sizeof(clickPriceText), "Price: %0.2f",
-               clickUpgradePrice);
+               game.clickPrice);
       DrawText(clickPriceText, (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 50, 20, neonGreen);
 
       if ((isClicked || IsKeyPressed(KEY_ONE)) &&
-          money >= clickUpgradePrice - 0.1) {
-        money -= clickUpgradePrice;
-        moneyPerClick *= 1.2;
-        clickUpgItems += 1;
-        clickUpgradePrice *= 1.6;
+          game.money >= game.clickPrice - 0.1) {
+        game.money -= game.clickPrice;
+        game.moneyPerClick *= 1.2;
+        game.clickItems += 1;
+        game.clickPrice *= 1.6;
       }
 #pragma endregion
 #pragma region Generator Upgrade
@@ -163,20 +182,23 @@ int main(void) {
       DrawText("Generator", (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 34 + blockHeight, 22, neonGreen);
       char genItemsText[20];
-      snprintf(genItemsText, sizeof(genItemsText), "Bought: %dx", genItems);
+      snprintf(genItemsText, sizeof(genItemsText), "Bought: %dx",
+               game.genItems);
       DrawText(genItemsText,
                (screenWidth / 3) * 2 +
                    ((screenWidth / 3) - MeasureText(genItemsText, 20) - 18),
                screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
       char genPriceText[30];
-      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.2f", genPrice);
+      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.2f",
+               game.genPrice);
       DrawText(genPriceText, (screenWidth / 3) * 2 + 10,
                screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
-      if ((isClicked || IsKeyPressed(KEY_TWO)) && money >= genPrice - 0.1) {
-        money -= genPrice;
-        moneyPerSecond += 0.1;
-        genItems += 1;
-        genPrice *= 1.6;
+      if ((isClicked || IsKeyPressed(KEY_TWO)) &&
+          game.money >= game.genPrice - 0.1) {
+        game.money -= game.genPrice;
+        game.moneyPerSecond += 0.1;
+        game.genItems += 1;
+        game.genPrice *= 1.6;
       }
 #pragma endregion
 
@@ -242,7 +264,9 @@ int main(void) {
                screenHeight / 4 + 2 * blockHeight - blockHeight / 2 - 9, 26,
                neonGreen);
       if (isClicked) {
-        // New Game Function
+        game = (GameData){0};
+        currentScreen = SCREEN_MAIN;
+        isMainMenuOpened = false;
       }
 
       // Save Game Button
@@ -258,7 +282,20 @@ int main(void) {
           "Save Game", (screenWidth / 2) - MeasureText("Save Game", 26) / 2,
           screenHeight / 4 + 3 * blockHeight - blockHeight / 2, 26, neonGreen);
       if (isClicked) {
-        // Save Game Function
+        saveGame(&game);
+        justSaved = true;
+      }
+      if (justSaved) {
+        timer += GetFrameTime();
+
+        if (timer < 1.5f) {
+          DrawText("Game Saved!",
+                   screenWidth / 2 - MeasureText("Game Saved!", 26) / 2,
+                   (screenHeight / 10) * 9, 26, neonGreen);
+        } else {
+          justSaved = false;
+          timer = 0.0f;
+        }
       }
 
       // Load Game Button
@@ -275,7 +312,21 @@ int main(void) {
                screenHeight / 4 + 4 * blockHeight - blockHeight / 2 + 6, 26,
                neonGreen);
       if (isClicked) {
-        // Load Game Function
+        game = loadGame();
+        justLoaded = true;
+      }
+
+      if (justLoaded) {
+        timer += GetFrameTime();
+
+        if (timer < 1.5f) {
+          DrawText("Game Loaded!",
+                   screenWidth / 2 - MeasureText("Game Loaded!", 26) / 2,
+                   (screenHeight / 10) * 9, 26, neonGreen);
+        } else {
+          justLoaded = false;
+          timer = 0.0f;
+        }
       }
 
       // Exit Game Button
@@ -304,3 +355,36 @@ int main(void) {
 
   return 0;
 }
+
+#pragma region Save Game Func
+void saveGame(GameData *data) {
+  FILE *file = fopen("savefile.txt", "wb");
+  if (file != KEY_NULL) {
+    fwrite(data, sizeof(GameData), 1, file);
+    fclose(file);
+    TraceLog(LOG_INFO, "Game Saved!");
+  } else {
+    TraceLog(LOG_ERROR, "Could not save game!");
+  }
+  return;
+}
+#pragma endregion
+
+#pragma region Load Game Func
+GameData loadGame() {
+  GameData data = {0};
+  data.moneyPerClick = 0.1;
+  data.moneyPerSecond = 0.0;
+  data.genPrice = 1.0;
+  data.clickPrice = 1.0;
+  FILE *file = fopen("savefile.txt", "rb");
+  if (file != NULL) {
+    fread(&data, sizeof(GameData), 1, file);
+    fclose(file);
+    TraceLog(LOG_INFO, "Game Loaded!");
+  } else {
+    TraceLog(LOG_ERROR, "No save file loaded, using defaults.");
+  }
+  return data;
+}
+#pragma endregion
