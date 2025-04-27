@@ -114,74 +114,70 @@ int main(void) {
       // Drawing Upgrades
       bool isUpgradeHovering = false;
       const int blockHeight = 75;
-#pragma region Generator  Upgrade
-      Rectangle generatorUpgrade = {(screenWidth / 3) * 2 + 6,
-                                    screenHeight * 0.05 + 26,
-                                    (screenWidth / 3) - 18, blockHeight};
-
-      DrawRectangleRec(generatorUpgrade, BLACK);
-
-      isUpgradeHovering = CheckCollisionPointRec(mousePoint, generatorUpgrade);
-      isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-      DrawRectangleRec(generatorUpgrade, isUpgradeHovering ? GRAY : BLACK);
-      DrawRectangleLines((screenWidth / 3) * 2 + 6, screenHeight * 0.05 + 26,
-                         screenWidth / 3 - 18, blockHeight, neonGreen);
-      DrawText("Generator", (screenWidth / 3) * 2 + 10,
-               screenHeight * 0.05 + 30, 22, neonGreen);
-      char genItemsText[20];
-      snprintf(genItemsText, sizeof(genItemsText), "Bought: %dx", genItems);
-      DrawText(genItemsText,
-               (screenWidth / 3) * 2 +
-                   ((screenWidth / 3) - MeasureText(genItemsText, 20) - 18),
-               screenHeight * 0.05 + 50, 20, neonGreen);
-      char genPriceText[30];
-      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.2f", genPrice);
-      DrawText(genPriceText, (screenWidth / 3) * 2 + 10,
-               screenHeight * 0.05 + 50, 20, neonGreen);
-
-      if ((isClicked || IsKeyPressed(KEY_ONE)) && money >= genPrice - 0.1) {
-        money -= genPrice;
-        moneyPerSecond += 0.1;
-        genItems += 1;
-        genPrice *= 1.6;
-      }
-
-#pragma endregion
-#pragma region Enhanced click Upgrade
+#pragma region Click Upgrade
       Rectangle clickUpgrade = {(screenWidth / 3) * 2 + 6,
-                                screenHeight * 0.05 + 32 + blockHeight,
+                                screenHeight * 0.05 + 26,
                                 (screenWidth / 3) - 18, blockHeight};
       DrawRectangleRec(clickUpgrade, BLACK);
       isUpgradeHovering = CheckCollisionPointRec(mousePoint, clickUpgrade);
       isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
       DrawRectangleRec(clickUpgrade, isUpgradeHovering ? GRAY : BLACK);
-      DrawRectangleLines((screenWidth / 3) * 2 + 6,
-                         screenHeight * 0.05 + 32 + blockHeight,
+      DrawRectangleLines((screenWidth / 3) * 2 + 6, screenHeight * 0.05 + 26,
                          screenWidth / 3 - 18, blockHeight, neonGreen);
       DrawText("Click Upgrade", (screenWidth / 3) * 2 + 10,
-               screenHeight * 0.05 + 34 + blockHeight, 22, neonGreen);
+               screenHeight * 0.05 + 30, 22, neonGreen);
       char clickItemsText[30];
       snprintf(clickItemsText, sizeof(clickItemsText), "Bought: %dx",
                clickUpgItems);
       DrawText(clickItemsText,
                (screenWidth / 3) * 2 +
                    ((screenWidth / 3) - MeasureText(clickItemsText, 20) - 18),
-               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
+               screenHeight * 0.05 + 50, 20, neonGreen);
       char clickPriceText[30];
       snprintf(clickPriceText, sizeof(clickPriceText), "Price: %0.2f",
                clickUpgradePrice);
       DrawText(clickPriceText, (screenWidth / 3) * 2 + 10,
-               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
+               screenHeight * 0.05 + 50, 20, neonGreen);
 
-      if ((isClicked || IsKeyPressed(KEY_TWO)) &&
+      if ((isClicked || IsKeyPressed(KEY_ONE)) &&
           money >= clickUpgradePrice - 0.1) {
         money -= clickUpgradePrice;
         moneyPerClick *= 1.2;
         clickUpgItems += 1;
         clickUpgradePrice *= 1.6;
       }
-
 #pragma endregion
+#pragma region Generator Upgrade
+      Rectangle generatorUpgrade = {(screenWidth / 3) * 2 + 6,
+                                    screenHeight * 0.05 + 32 + blockHeight,
+                                    (screenWidth / 3) - 18, blockHeight};
+      DrawRectangleRec(generatorUpgrade, BLACK);
+      isUpgradeHovering = CheckCollisionPointRec(mousePoint, generatorUpgrade);
+      isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+      DrawRectangleRec(generatorUpgrade, isUpgradeHovering ? GRAY : BLACK);
+      DrawRectangleLines((screenWidth / 3) * 2 + 6,
+                         screenHeight * 0.05 + 32 + blockHeight,
+                         screenWidth / 3 - 18, blockHeight, neonGreen);
+      DrawText("Generator", (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 34 + blockHeight, 22, neonGreen);
+      char genItemsText[20];
+      snprintf(genItemsText, sizeof(genItemsText), "Bought: %dx", genItems);
+      DrawText(genItemsText,
+               (screenWidth / 3) * 2 +
+                   ((screenWidth / 3) - MeasureText(genItemsText, 20) - 18),
+               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
+      char genPriceText[30];
+      snprintf(genPriceText, sizeof(genPriceText), "Price: %0.2f", genPrice);
+      DrawText(genPriceText, (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 56 + blockHeight, 20, neonGreen);
+      if ((isClicked || IsKeyPressed(KEY_TWO)) && money >= genPrice - 0.1) {
+        money -= genPrice;
+        moneyPerSecond += 0.1;
+        genItems += 1;
+        genPrice *= 1.6;
+      }
+#pragma endregion
+
     } else if (currentScreen == SCREEN_SHORTCUTS) {
 #pragma region SHORTCUTS
       char titleSh[] = "Shortcuts:";
