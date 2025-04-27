@@ -75,6 +75,8 @@ int main(void) {
                neonGreen);
       DrawText("Upgrades & Items:", (screenWidth / 3) * 2 + 10,
                screenHeight * 0.04, 22, neonGreen);
+      DrawText("ESC: Main Menu", 10, 10, 16, neonGreen);
+      DrawText("TAB: Shortcut Menu", 10, 26, 16, neonGreen);
       DrawLine(screenWidth / 3, screenHeight * 0.05 + 20, screenWidth - 6,
                screenHeight * 0.05 + 20, neonGreen);
 
