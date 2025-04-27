@@ -2,10 +2,6 @@
 #include <math.h>
 #include <stdio.h>
 
-double money = 0.0;
-double moneyPerSecond = 0.0;
-double moneyPerClick = 0.1;
-
 typedef struct GameData {
   // Default Variables
   double money;
@@ -33,12 +29,13 @@ int main(void) {
   SetTargetFPS(60);
   SetExitKey(KEY_NULL);
 
-  // Game Variables
+  // Game Screens
   typedef enum { SCREEN_MAIN, SCREEN_SHORTCUTS, SCREEN_MAINMENU } GameScreen;
   GameScreen currentScreen = SCREEN_MAIN;
 
   bool isMainMenuOpened = false;
 
+  // Defaulting Variables
   bool justSaved = false;
   bool justLoaded = false;
   static float timer = 0.0f;
@@ -57,8 +54,10 @@ int main(void) {
     // Colors
     Color neonGreen = (Color){57, 255, 20, 255};
 
+    // Mouse XY Axis
     Vector2 mousePoint = GetMousePosition();
 
+    // Openning Shortcut Screen
     if (IsKeyPressed(KEY_TAB)) {
       currentScreen =
           (currentScreen == SCREEN_MAIN) ? SCREEN_SHORTCUTS : SCREEN_MAIN;
@@ -67,11 +66,14 @@ int main(void) {
       currentScreen = isMainMenuOpened ? SCREEN_MAINMENU : SCREEN_MAIN;
     }
 
+    // Drawing APP
     BeginDrawing();
     ClearBackground(BLACK);
     DrawRectangleLines(6, 6, screenWidth - 12, screenHeight - 12, neonGreen);
 
+    // Screen Selector
     if (currentScreen == SCREEN_MAIN) {
+      // Generate Button
       Rectangle button = {screenWidth / 6 - 100, screenHeight / 2 - 50, 200,
                           50};
       bool isHovering = CheckCollisionPointRec(mousePoint, button);
@@ -81,6 +83,7 @@ int main(void) {
         game.money += game.moneyPerClick;
       }
 
+      // Generating Money Per Second
       if (game.moneyPerSecond > 0) {
         game.money += game.moneyPerSecond / 60;
       }
@@ -124,13 +127,6 @@ int main(void) {
         }
       }
 #pragma endregion
-
-      char saveTimerText[20];
-      snprintf(saveTimerText, sizeof(saveTimerText), "Autosave: %0.1fs",
-               secondsTillSave);
-      DrawText(saveTimerText,
-               screenWidth / 2 - MeasureText(saveTimerText, 20) / 2,
-               (screenHeight / 10) * 9, 20, neonGreen);
 
       // Drawing Statistics
       char moneyPerClickText[30];
@@ -375,7 +371,10 @@ int main(void) {
                screenHeight / 4 + 5 * blockHeight - blockHeight / 2 + 12, 26,
                neonGreen);
       if (isClicked) {
-        // Exit Function
+        saveGame(&game);
+        EndDrawing();
+        CloseWindow();
+        return 0;
       }
 
 #pragma endregion
