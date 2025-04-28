@@ -1,2 +1,6 @@
 /.vscode
 /savefile.txt
+/Makefile
+/Makefile.Android
+/main.code-workspace
+/main.exe

@@ -119,13 +119,20 @@ int main(void) {
         if (timer < 1.5f) {
           DrawText("Game Saved!",
                    screenWidth / 2 - MeasureText("Game Saved!", 26) / 2,
-                   (screenHeight / 10) * 8, 26, neonGreen);
+                   (screenHeight / 10) * 9 - 26, 26, neonGreen);
         } else {
           justSaved = false;
 
           timer = 0.0f;
         }
       }
+
+      char autosaveTimer[20];
+      snprintf(autosaveTimer, sizeof(autosaveTimer), "Autosave in: %0.1fs",
+               secondsTillSave);
+      DrawText(autosaveTimer,
+               screenWidth / 2 - MeasureText(autosaveTimer, 20) / 2,
+               (screenHeight / 10) * 9, 20, neonGreen);
 #pragma endregion
 
       // Drawing Statistics
