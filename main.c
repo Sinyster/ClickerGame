@@ -19,6 +19,9 @@ typedef struct GameData {
 
   double clickPrice;
   int clickItems;
+
+  double batteryCapPrice;
+  int batteryCapItems;
 } GameData;
 
 void saveGame(GameData *data);
@@ -52,11 +55,13 @@ int main(void) {
   GameData game = {0};
   game.moneyPerClick = 0.1;
   game.moneyPerSecond = 0.0;
-  game.genPrice = 1.0;
-  game.clickPrice = 1.0;
   game.batteryCapacity = 100.0;
   game.batteryPercent = game.batteryCapacity;
   game.batteryDrainPerSecond = 1.0;
+  // Prices
+  game.genPrice = 10.0;
+  game.clickPrice = 200.0;
+  game.batteryCapPrice = 750.0;
 
   // Timer Variables
   static float timer = 0.0f;
@@ -140,11 +145,25 @@ int main(void) {
                (screenWidth / 6) - MeasureText(batteryLife, 20) / 2,
                screenHeight * 0.8 - 20, 20, neonGreen);
       DrawText("Recharge", screenWidth / 6 - MeasureText("Recharge", 22) / 2,
-               screenHeight * 0.8 + 75 / 2 - 11, 22, neonGreen);
+               screenHeight * 0.8 + 75 / 2 - 22, 22, neonGreen);
+      DrawText("Cost: 10 percent of money",
+               screenWidth / 6 -
+                   MeasureText("Cost: 10 percent of money", 16) / 2,
+               screenHeight * 0.8 + 40, 16, neonGreen);
+
+      if (isClicked || IsKeyPressed(KEY_R) && game.money > 0.0) {
+        if (game.batteryPercent < game.batteryCapacity * 0.9) {
+          game.money -= game.money * 0.1;
+          game.batteryPercent += game.batteryPercent * 0.2;
+          if (game.batteryPercent > game.batteryCapacity) {
+            game.batteryPercent = game.batteryCapacity;
+          }
+        }
+      }
 
       // Battery function
       if (game.moneyPerSecond > 0.0) {
-        game.batteryPercent -= GetFrameTime();
+        game.batteryPercent -= GetFrameTime() * (1 + game.genItems * 0.2);
         if (game.batteryPercent < 0.1) {
           currentScreen = SCREEN_GAMEOVER;
         }
@@ -289,6 +308,42 @@ int main(void) {
       }
 #pragma endregion
 
+#pragma region Battery Cap Upg
+      Rectangle batteryCapUpgrade = {(screenWidth / 3) * 2 + 6,
+                                     screenHeight * 0.05 + 38 + blockHeight * 2,
+                                     (screenWidth / 3) - 18, blockHeight};
+      isUpgradeHovering = CheckCollisionPointRec(mousePoint, batteryCapUpgrade);
+      isClicked = isUpgradeHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+      DrawRectangleRec(batteryCapUpgrade, isUpgradeHovering ? GRAY : BLACK);
+      DrawRectangleLines((screenWidth / 3) * 2 + 6,
+                         screenHeight * 0.05 + 38 + blockHeight * 2,
+                         (screenWidth / 3) - 18, blockHeight, neonGreen);
+      DrawText("Battery Capacity", (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 42 + blockHeight * 2, 22, neonGreen);
+      char batteryCapPriceText[30];
+      snprintf(batteryCapPriceText, sizeof(batteryCapPriceText), "Price: %0.2f",
+               game.batteryCapPrice);
+      DrawText(batteryCapPriceText, (screenWidth / 3) * 2 + 10,
+               screenHeight * 0.05 + 62 + blockHeight * 2, 20, neonGreen);
+
+      char batteryCapItemsText[30];
+      snprintf(batteryCapItemsText, sizeof(batteryCapItemsText), "Bought: %dx",
+               game.batteryCapItems);
+      DrawText(batteryCapItemsText,
+               (screenWidth / 3) * 2 + screenWidth / 3 -
+                   MeasureText(batteryCapItemsText, 20) - 18,
+               screenHeight * 0.05 + 62 + blockHeight * 2, 20, neonGreen);
+
+      if (isClicked ||
+          IsKeyPressed(KEY_THREE) && game.money > game.batteryCapPrice) {
+        game.money -= game.batteryCapPrice;
+        game.batteryCapPrice *= 1.6;
+        game.batteryCapacity *= 1.3;
+      }
+
+#pragma endregion
+
     } else if (currentScreen == SCREEN_SHORTCUTS) {
 #pragma region SHORTCUTS
       char titleSh[] = "Shortcuts:";
@@ -309,10 +364,6 @@ int main(void) {
                (screenWidth / 6) * 4 -
                    MeasureText("ESC: Opens Main Menu", 24) / 2,
                screenHeight / 6, 24, neonGreen);
-#pragma endregion
-
-#pragma region Battery Cap Upg
-
 #pragma endregion
 
 #pragma region MAINMENU
@@ -357,8 +408,19 @@ int main(void) {
                neonGreen);
       if (isClicked) {
         game = (GameData){0};
+        game.moneyPerClick = 0.1;
+        game.moneyPerSecond = 0.0;
+        game.batteryCapacity = 100.0;
+        game.batteryPercent = game.batteryCapacity;
+        game.batteryDrainPerSecond = 1.0;
+        // Prices
+        game.genPrice = 10.0;
+        game.clickPrice = 200.0;
+        game.batteryCapPrice = 750.0;
+
         currentScreen = SCREEN_MAIN;
         isMainMenuOpened = false;
+        saveTimer = 30.0f;
       }
 
       // Save Game Button
@@ -470,11 +532,13 @@ GameData loadGame() {
   GameData data = {0};
   data.moneyPerClick = 0.1;
   data.moneyPerSecond = 0.0;
-  data.genPrice = 1.0;
-  data.clickPrice = 1.0;
+  data.genPrice = 10.0;
+  data.clickPrice = 200.0;
   data.batteryCapacity = 100.0;
   data.batteryPercent = data.batteryCapacity;
   data.batteryDrainPerSecond = 1.0;
+  data.batteryCapPrice = 750.0;
+
   FILE *file = fopen("savefile.txt", "rb");
   if (file != NULL) {
     fread(&data, sizeof(GameData), 1, file);
