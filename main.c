@@ -8,6 +8,11 @@ typedef struct GameData {
   double moneyPerSecond;
   double moneyPerClick;
 
+  // Battery & Stuff
+  double batteryCapacity;
+  double batteryPercent;
+  double batteryDrainPerSecond;
+
   // Items Variables
   double genPrice;
   int genItems;
@@ -30,7 +35,12 @@ int main(void) {
   SetExitKey(KEY_NULL);
 
   // Game Screens
-  typedef enum { SCREEN_MAIN, SCREEN_SHORTCUTS, SCREEN_MAINMENU } GameScreen;
+  typedef enum {
+    SCREEN_MAIN,
+    SCREEN_SHORTCUTS,
+    SCREEN_MAINMENU,
+    SCREEN_GAMEOVER
+  } GameScreen;
   GameScreen currentScreen = SCREEN_MAIN;
 
   bool isMainMenuOpened = false;
@@ -38,15 +48,21 @@ int main(void) {
   // Defaulting Variables
   bool justSaved = false;
   bool justLoaded = false;
-  static float timer = 0.0f;
-  static float saveTimer = 0.0f;
-  static float secondsTillSave = 30.0f;
 
   GameData game = {0};
   game.moneyPerClick = 0.1;
   game.moneyPerSecond = 0.0;
   game.genPrice = 1.0;
   game.clickPrice = 1.0;
+  game.batteryCapacity = 100.0;
+  game.batteryPercent = game.batteryCapacity;
+  game.batteryDrainPerSecond = 1.0;
+
+  // Timer Variables
+  static float timer = 0.0f;
+  static float saveTimer = 0.0f;
+  static float secondsTillSave = 30.0f;
+
 #pragma endregion
 
 #pragma region APP
@@ -73,6 +89,7 @@ int main(void) {
 
     // Screen Selector
     if (currentScreen == SCREEN_MAIN) {
+#pragma region Base Render
       // Generate Button
       Rectangle button = {screenWidth / 6 - 100, screenHeight / 2 - 50, 200,
                           50};
@@ -88,7 +105,6 @@ int main(void) {
         game.money += game.moneyPerSecond / 60;
       }
 
-#pragma region Base Render
       // Drawing Base Environment
       DrawRectangleLines(screenWidth / 3, 6, screenWidth / 3, screenHeight - 12,
                          neonGreen);
@@ -104,6 +120,36 @@ int main(void) {
       DrawText("TAB: Shortcut Menu", 10, 26, 16, neonGreen);
       DrawLine(screenWidth / 3, screenHeight * 0.05 + 20, screenWidth - 6,
                screenHeight * 0.05 + 20, neonGreen);
+
+#pragma endregion
+
+#pragma region Battery Function
+      // Battery Render
+      Rectangle batteryRecharge = {(screenWidth / 6) - 100, screenHeight * 0.8,
+                                   200, 75};
+      isHovering = CheckCollisionPointRec(mousePoint, batteryRecharge);
+      isClicked = isHovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+      DrawRectangleRec(batteryRecharge, isHovering ? GRAY : BLACK);
+      DrawRectangleLines((screenWidth / 6 - 100), screenHeight * 0.8, 200, 75,
+                         neonGreen);
+
+      char batteryLife[30];
+      snprintf(batteryLife, sizeof(batteryLife), "Battery: %0.1f",
+               game.batteryPercent);
+      DrawText(batteryLife,
+               (screenWidth / 6) - MeasureText(batteryLife, 20) / 2,
+               screenHeight * 0.8 - 20, 20, neonGreen);
+      DrawText("Recharge", screenWidth / 6 - MeasureText("Recharge", 22) / 2,
+               screenHeight * 0.8 + 75 / 2 - 11, 22, neonGreen);
+
+      // Battery function
+      if (game.moneyPerSecond > 0.0) {
+        game.batteryPercent -= GetFrameTime();
+        if (game.batteryPercent < 0.1) {
+          currentScreen = SCREEN_GAMEOVER;
+        }
+      }
+#pragma endregion
 
 #pragma region AutoSave Func
       secondsTillSave -= GetFrameTime();
@@ -134,18 +180,23 @@ int main(void) {
                screenWidth / 2 - MeasureText(autosaveTimer, 20) / 2,
                (screenHeight / 10) * 9, 20, neonGreen);
 #pragma endregion
-
+#pragma region Draw Stats
       // Drawing Statistics
+      char batteryDrainText[30];
+      snprintf(batteryDrainText, sizeof(batteryDrainText),
+               "Battery Drain: %0.1fs", game.batteryDrainPerSecond);
+      DrawText(batteryDrainText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
+               22, neonGreen);
       char moneyPerClickText[30];
       snprintf(moneyPerClickText, sizeof(moneyPerClickText),
                "Generating per click: %0.2f", game.moneyPerClick);
-      DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 30,
+      DrawText(moneyPerClickText, screenWidth / 3 + 6, screenHeight * 0.05 + 60,
                22, neonGreen);
       char generatorPerSecond[30];
       snprintf(generatorPerSecond, sizeof(generatorPerSecond),
                "Generators generating: %0.2f/s", game.genItems * 0.1);
       DrawText(generatorPerSecond, screenWidth / 3 + 6,
-               screenHeight * 0.05 + 60, 22, neonGreen);
+               screenHeight * 0.05 + 90, 22, neonGreen);
 #pragma endregion
 #pragma region Money
       // Format money into Text
@@ -259,6 +310,11 @@ int main(void) {
                    MeasureText("ESC: Opens Main Menu", 24) / 2,
                screenHeight / 6, 24, neonGreen);
 #pragma endregion
+
+#pragma region Battery Cap Upg
+
+#pragma endregion
+
 #pragma region MAINMENU
     } else if (currentScreen == SCREEN_MAINMENU) {
       int blockHeight = 65;
@@ -416,6 +472,9 @@ GameData loadGame() {
   data.moneyPerSecond = 0.0;
   data.genPrice = 1.0;
   data.clickPrice = 1.0;
+  data.batteryCapacity = 100.0;
+  data.batteryPercent = data.batteryCapacity;
+  data.batteryDrainPerSecond = 1.0;
   FILE *file = fopen("savefile.txt", "rb");
   if (file != NULL) {
     fread(&data, sizeof(GameData), 1, file);
